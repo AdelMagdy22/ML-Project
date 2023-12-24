@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 import random
+from sklearn.metrics.pairwise import euclidean_distances
 
 
-dataset_path = '/Users/moustafahashem/PycharmProjects/ML_Project/insurance.csv'
+dataset_path = 'E:/auniverstiy/ML/Project/insurance - Copy.csv'
 df = pd.read_csv(dataset_path)
 X = df[['age', 'sex', 'bmi', 'children', 'smoker', 'region']]  # Features
 Y = df['charges']  # Target
@@ -47,5 +49,26 @@ print("====================After Scaling========================")
 print(df.describe())
 
 
+# KNN Module
+def KNN_Module(k, x_train, x_test, y_train, y_test):
+    # One-hot encode categorical columns, this function convert string data to integer data to easier deal with it
+    x_train = pd.get_dummies(x_train, columns=['sex', 'smoker', 'region'])
+    x_test = pd.get_dummies(x_test, columns=['sex', 'smoker', 'region'])
+    all_distances = []
+    for i in range(len(x_test)):
+        distances = []
+        for j in range(len(x_train)):
+            # Reshape data before computing euclidean distance
+            distance = euclidean_distances(x_test.iloc[i].values.reshape(1, -1), x_train.iloc[j].values.reshape(1, -1))
+            distances.append(distance[0][0])  # Accessing the distance value from the resulting 2D array
+        
+        # sort data to get the nearest neighbors
+        distances = np.argsort(distances)[:k]
+        distances = np.mean(y_train.iloc[distances])
+        all_distances.append(distances)
+    return all_distances
 
-
+print("====================Test Data========================")
+print(y_test)
+print("====================KNN Module========================")
+print(KNN_Module(4,x_train, x_test, y_train, y_test))
